@@ -25,7 +25,7 @@ const LaunchCard = ({ ...props }: LaunchCardProps) => {
           {new Date(props.launch_date_utc).toLocaleDateString()}
         </Text>
         <Text numberOfLines={3} style={styles.details}>
-          {props.details || "No description"}
+          {props.details || "No details available"}
         </Text>
       </View>
     </TouchableOpacity>

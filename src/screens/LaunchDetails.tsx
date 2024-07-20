@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -25,9 +33,9 @@ const LaunchDetails = ({ route, navigation }: Props) => {
 
   const rockets = useRocketStore((state) => state.rockets);
 
-  const currentRocket = rockets.find(
-    (rocket) => rocket.id === launchDetails?.rocket
-  );
+  const currentRocket = useMemo(() => {
+    return rockets.find((rocket) => rocket.id === launchDetails?.rocket);
+  }, [rockets, launchDetails?.rocket]);
 
   if (isLoading)
     return (
@@ -35,13 +43,14 @@ const LaunchDetails = ({ route, navigation }: Props) => {
         <Loading />
       </View>
     );
+
   if (isError)
     return (
       <View style={styles.altContainer}>
-        {" "}
         <Text style={styles.errorText}>{error.message}</Text>
       </View>
     );
+
   if (!launchDetails)
     return (
       <View style={styles.altContainer}>
@@ -51,52 +60,56 @@ const LaunchDetails = ({ route, navigation }: Props) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>{launchDetails.mission_name}</Text>
-      <Text style={styles.date}>
-        {new Date(launchDetails.launch_date_utc).toLocaleDateString()}
-      </Text>
-      <Text style={styles.details}>{launchDetails.details}</Text>
-      <Image
-        source={{ uri: launchDetails.img }}
-        width={100}
-        height={100}
-        resizeMode="contain"
-        style={styles.lauchLogo}
-      />
-      {!!currentRocket && (
-        <View style={styles.rocketSection}>
-          <Text style={styles.h2}>Rocket details:</Text>
-          <Text style={styles.details}>
-            {currentRocket?.name || "Rocket name not found"}
-          </Text>
-          <Text style={styles.details}>
-            {currentRocket?.type || "Rocket type not found"}
-          </Text>
-          <Image
-            source={{ uri: currentRocket?.image || "" }}
-            style={styles.rocketImage}
-          />
-        </View>
-      )}
-      {launchDetails.links.article_link && (
-        <View>
-          <Text style={styles.h2}>Read more:</Text>
-          <LinkButton url={launchDetails.links.article_link} />
-        </View>
-      )}
-      {launchDetails.links.video_link && (
-        <View>
-          <Text style={styles.h2}>Watch video</Text>
-          <LinkButton url={launchDetails.links.video_link} />
-        </View>
-      )}
+      <ScrollView style={styles.scrollViewContainer}>
+        <Text style={styles.title}>{launchDetails.mission_name}</Text>
+        <Text style={styles.date}>
+          {new Date(launchDetails.launch_date_utc).toLocaleDateString()}
+        </Text>
+        <Text style={styles.details}>
+          {launchDetails.details || "No details available"}
+        </Text>
+        <Image
+          source={{ uri: launchDetails.img }}
+          width={100}
+          height={100}
+          resizeMode="contain"
+          style={styles.lauchLogo}
+        />
+        {!!currentRocket && (
+          <View style={styles.rocketSection}>
+            <Text style={styles.h2}>Rocket details:</Text>
+            <Text style={styles.details}>
+              Rocket name: {currentRocket?.name || "Rocket name not found"}
+            </Text>
+            <Text style={styles.details}>
+              Rocket type: {currentRocket?.type || "Rocket type not found"}
+            </Text>
+            <Image
+              source={{ uri: currentRocket?.image || "" }}
+              style={styles.rocketImage}
+            />
+          </View>
+        )}
+        {launchDetails.links.article_link && (
+          <View style={styles.section}>
+            <Text style={styles.h2}>Read more:</Text>
+            <LinkButton url={launchDetails.links.article_link} />
+          </View>
+        )}
+        {launchDetails.links.video_link && (
+          <View style={styles.section}>
+            <Text style={styles.h2}>Watch video</Text>
+            <LinkButton url={launchDetails.links.video_link} />
+          </View>
+        )}
 
-      <TouchableOpacity
-        style={styles.goBackButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.h2}>Go back</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.goBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.h2}>Go back</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -151,8 +164,8 @@ const styles = StyleSheet.create({
   rocketImage: {
     width: "100%",
     height: 200,
-    marginBottom: 8,
     resizeMode: "contain",
+    marginVertical: 16,
   },
   goBackButton: {
     padding: 8,
@@ -160,5 +173,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 16,
+  },
+  scrollViewContainer: {
+    flex: 1,
+  },
+  section: {
+    marginVertical: 16,
   },
 });

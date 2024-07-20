@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Text, FlatList, StyleSheet, View } from "react-native";
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -28,9 +28,11 @@ const LaunchList = ({ navigation }: Props) => {
     }
   }, [isRocketsOk, rockets, setRockets]);
 
-  const filteredLaunches = selectedRocketId
-    ? launches?.filter((launch) => launch.rocket === selectedRocketId)
-    : launches;
+  const filteredLaunches = useMemo(() => {
+    return selectedRocketId
+      ? launches?.filter((launch) => launch.rocket === selectedRocketId)
+      : launches;
+  }, [selectedRocketId, launches]);
 
   if (isLoading)
     return (
